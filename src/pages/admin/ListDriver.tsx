@@ -1,4 +1,5 @@
-import React from "react";
+import CreateUserOverlay from "@/components/CreateUserOverlay";
+import React, { useState } from "react";
 
 type DriverStatus = "available" | "busy" | "offline";
 
@@ -28,6 +29,8 @@ const ListDriver = () => {
     { id: "D", orderId: "#676745", status: "offline" },
   ];
 
+  const [openCreate, setOpenCreate] = useState(false);
+
   const renderStatus = (status: DriverStatus) => {
     switch (status) {
       case "available":
@@ -50,7 +53,10 @@ const ListDriver = () => {
           <span className="font-semibold">{drivers.length}</span>
         </div>
 
-        <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+        <button
+          onClick={() => setOpenCreate(true)}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
+        >
           Thêm tài xế
         </button>
       </div>
@@ -103,6 +109,11 @@ const ListDriver = () => {
           </table>
         </div>
       </div>
+      <CreateUserOverlay
+        open={openCreate}
+        mode="driver"
+        onClose={() => setOpenCreate(false)}
+      />
     </div>
   );
 };

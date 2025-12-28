@@ -1,4 +1,5 @@
-import React from "react";
+import CreateUserOverlay from "@/components/CreateUserOverlay";
+import React, { useState } from "react";
 
 type Restaurant = {
   name: string;
@@ -37,7 +38,7 @@ const ListRestaurant = () => {
     { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
     { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
   ];
-
+  const [openCreate, setOpenCreate] = useState(false);
   return (
     <div className="container mx-auto mt-[50px]">
       {/* Header */}
@@ -46,7 +47,10 @@ const ListRestaurant = () => {
           Tổng số lượng nhà hàng:{" "}
           <span className="font-semibold">{restaurants.length}</span>
         </div>
-        <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+        <button
+          onClick={() => setOpenCreate(true)}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
+        >
           Thêm nhà hàng
         </button>
       </div>
@@ -99,6 +103,11 @@ const ListRestaurant = () => {
           </table>
         </div>
       </div>
+      <CreateUserOverlay
+        open={openCreate}
+        mode="restaurant"
+        onClose={() => setOpenCreate(false)}
+      />
     </div>
   );
 };
