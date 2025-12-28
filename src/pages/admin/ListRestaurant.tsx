@@ -1,4 +1,7 @@
 import CreateUserOverlay from "@/components/CreateUserOverlay";
+import RestaurantDetailOverlay from "@/components/RestaurantDetailOverlay";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 
 type Restaurant = {
@@ -8,7 +11,7 @@ type Restaurant = {
 };
 
 const ListRestaurant = () => {
-  const restaurants: Restaurant[] = [
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([
     { name: "KFC", orderId: "#238283", status: "Chưa chuẩn bị" },
     { name: "Lotteria", orderId: "#893483", status: "Chưa chuẩn bị" },
     { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
@@ -16,29 +19,22 @@ const ListRestaurant = () => {
     { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
     { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
     { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#238283", status: "Chưa chuẩn bị" },
-    { name: "Lotteria", orderId: "#893483", status: "Chưa chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-  ];
+  ]);
   const [openCreate, setOpenCreate] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
+
+  const handleStatusChange = (
+    index: number,
+    newStatus: Restaurant["status"]
+  ) => {
+    setRestaurants((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, status: newStatus } : item
+      )
+    );
+  };
+
   return (
     <div className="container mx-auto mt-[50px]">
       {/* Header */}
@@ -72,24 +68,42 @@ const ListRestaurant = () => {
 
             <tbody>
               {restaurants.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border-b last:border-b-0 hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4 font-medium">{item.name}</td>
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="px-6 py-4 font-medium">
+                    {item.name}{" "}
+                    <span className="text-sm cursor-pointer  transition duration-300">
+                      <FontAwesomeIcon
+                        icon={faEye}
+                        onClick={() => {
+                          setSelectedRestaurant(item.name);
+                          setOpenDetail(true);
+                        }}
+                        className="ml-2 cursor-pointer  hover:text-blue-600"
+                      />
+                    </span>
+                  </td>
                   <td className="px-6 py-4">{item.orderId}</td>
 
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium
-                    ${
-                      item.status === "Đã chuẩn bị"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
+                    <select
+                      value={item.status}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          index,
+                          e.target.value as Restaurant["status"]
+                        )
+                      }
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium border
+                ${
+                  item.status === "Đã chuẩn bị"
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                }
+              `}
                     >
-                      {item.status}
-                    </span>
+                      <option value="Chưa chuẩn bị">Chưa chuẩn bị</option>
+                      <option value="Đã chuẩn bị">Đã chuẩn bị</option>
+                    </select>
                   </td>
 
                   <td className="px-6 py-4 text-center">
@@ -107,6 +121,11 @@ const ListRestaurant = () => {
         open={openCreate}
         mode="restaurant"
         onClose={() => setOpenCreate(false)}
+      />
+      <RestaurantDetailOverlay
+        open={openDetail}
+        restaurantName={selectedRestaurant}
+        onClose={() => setOpenDetail(false)}
       />
     </div>
   );

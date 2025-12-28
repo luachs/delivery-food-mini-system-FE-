@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
 import Button from "./ui/Button";
+import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   username: string;
@@ -9,6 +10,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ username, title }) => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
 
   const toggleMenu = () => {
@@ -30,7 +32,9 @@ const Navbar: React.FC<NavbarProps> = ({ username, title }) => {
 
         {open && (
           <div className="absolute right-0 top-10 z-10">
-            <Button variant="primary">Đăng xuất</Button>
+            <Button variant="primary" onClick={() => navigate("/logout")}>
+              Đăng xuất
+            </Button>
           </div>
         )}
       </div>

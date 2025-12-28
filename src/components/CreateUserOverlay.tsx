@@ -26,7 +26,6 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
   const isDriver = mode === "driver";
 
   const title = isDriver ? "Tạo tài xế mới" : "Tạo nhà hàng mới";
-  const nameLabel = isDriver ? "Tên tài xế" : "Tên nhà hàng";
   const submitText = isDriver ? "Tạo tài xế" : "Tạo nhà hàng";
 
   /* ================= Animation Control ================= */
@@ -79,7 +78,7 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
         ? "Tạo tài xế mới thành công"
         : "Tạo nhà hàng mới thành công"
     );
-    
+
     setForm({
       name: "",
       email: "",
@@ -125,8 +124,8 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
         {/* Form */}
         <div className="space-y-4">
           <Input
-            label={nameLabel}
-            placeholder={nameLabel}
+            label="username"
+            placeholder="username"
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
           />

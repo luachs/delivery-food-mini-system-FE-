@@ -1,0 +1,17 @@
+@keyframes blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+.eye-click {
+  transform-origin: center;
+}
+
+.eye-click.blinking {
+  animation: blink 0.25s ease-in-out;
+}
