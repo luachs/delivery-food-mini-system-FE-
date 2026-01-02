@@ -2,131 +2,173 @@ import CreateUserOverlay from "@/components/CreateUserOverlay";
 import RestaurantDetailOverlay from "@/components/RestaurantDetailOverlay";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRestaurantStore } from "@/store/restaurantStore";
+
+/* =======================
+   TYPES
+======================= */
+
+type RestaurantStatus = "AVAILABLE" | "LOCKED";
 
 type Restaurant = {
+  id: number;
   name: string;
-  orderId: string;
-  status: "Chưa chuẩn bị" | "Đã chuẩn bị";
+  address: string;
+  phone: string;
+  restaurantStatus: RestaurantStatus;
 };
 
+/* =======================
+   STATUS MAPPER
+======================= */
+
+const RESTAURANT_STATUS_LABEL: Record<RestaurantStatus, string> = {
+  AVAILABLE: "Đang hoạt động",
+  LOCKED: "Ngừng hoạt động",
+};
+
+const RESTAURANT_STATUS_STYLE: Record<RestaurantStatus, string> = {
+  AVAILABLE: "bg-green-100 text-green-700 border-green-200",
+  LOCKED: "bg-red-100 text-red-700 border-red-200",
+};
+
+/* =======================
+   COMPONENT
+======================= */
+
 const ListRestaurant = () => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([
-    { name: "KFC", orderId: "#238283", status: "Chưa chuẩn bị" },
-    { name: "Lotteria", orderId: "#893483", status: "Chưa chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-    { name: "Pizza Hut", orderId: "#676745", status: "Đã chuẩn bị" },
-    { name: "KFC", orderId: "#434573", status: "Đã chuẩn bị" },
-  ]);
+  const restaurants = useRestaurantStore((state) => state.restaurants);
+  const blockRestaurant = useRestaurantStore((state) => state.blockRestaurant);
+  const fetchRestaurants = useRestaurantStore(
+    (state) => state.fetchRestaurants
+  );
+  const loading = useRestaurantStore((state) => state.loading);
+
   const [openCreate, setOpenCreate] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<Restaurant | null>(null);
 
-  const handleStatusChange = (
-    index: number,
-    newStatus: Restaurant["status"]
-  ) => {
-    setRestaurants((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, status: newStatus } : item
-      )
-    );
+  useEffect(() => {
+    fetchRestaurants();
+  }, [fetchRestaurants]);
+
+  const handleBlockRestaurant = async (id: number) => {
+    try {
+      await blockRestaurant(id);
+    } catch (err) {
+      console.error("Lỗi khóa nhà hàng:", err);
+    }
   };
 
   return (
     <div className="container mx-auto mt-[50px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div className=" text-xl font-semibold text-gray-700">
+        <div className="text-xl font-semibold text-gray-700">
           Tổng số lượng nhà hàng:{" "}
-          <span className="font-semibold">{restaurants.length}</span>
+          <span className="font-bold">{restaurants.length}</span>
         </div>
+
         <button
           onClick={() => setOpenCreate(true)}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
-        >
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
           Thêm nhà hàng
         </button>
       </div>
 
-      {/* Count */}
-
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <div className="max-h-[530px] overflow-y-auto">
+        <div className="max-h-[420px] overflow-y-auto">
           <table className="min-w-full text-sm text-left">
-            <thead className=" sticky top-0 z-10 border-b bg-gray-50 font-medium">
+            <thead className="sticky top-0 z-10 border-b bg-gray-50 font-medium">
               <tr>
-                <th className="px-6 py-3">Tên nhà hàng</th>
-                <th className="px-6 py-3">Đơn hàng</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-center">Action</th>
+                <th className="px-6 py-3">ID</th>
+                <th className="px-6 py-3">Địa chỉ</th>
+                <th className="px-6 py-3">SĐT</th>
+                <th className="px-6 py-3">Trạng thái</th>
+                <th className="px-6 py-3 text-center">Hành động</th>
               </tr>
             </thead>
 
             <tbody>
-              {restaurants.map((item, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
+              {restaurants.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-b last:border-b-0 hover:bg-gray-50">
+                  {/* ID + view */}
                   <td className="px-6 py-4 font-medium">
-                    {item.name}{" "}
-                    <span className="text-sm cursor-pointer  transition duration-300">
-                      <FontAwesomeIcon
-                        icon={faEye}
-                        onClick={() => {
-                          setSelectedRestaurant(item.name);
-                          setOpenDetail(true);
-                        }}
-                        className="ml-2 cursor-pointer  hover:text-blue-600"
-                      />
+                    {item.id}
+                    <FontAwesomeIcon
+                      icon={faEye}
+                      className="ml-2 cursor-pointer text-blue-600 hover:text-blue-800"
+                      onClick={() => {
+                        setSelectedRestaurant(item);
+                        setOpenDetail(true);
+                      }}
+                    />
+                  </td>
+
+                  <td className="px-6 py-4">{item.address}</td>
+                  <td className="px-6 py-4">{item.phone}</td>
+
+                  {/* STATUS */}
+                  <td className="px-6 py-4">
+                    <span
+                      className={`
+                        px-3 py-1.5 rounded-md text-xs font-semibold border
+                        ${RESTAURANT_STATUS_STYLE[item.restaurantStatus]}
+                      `}>
+                      {RESTAURANT_STATUS_LABEL[item.restaurantStatus]}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{item.orderId}</td>
 
-                  <td className="px-6 py-4">
-                    <select
-                      value={item.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          index,
-                          e.target.value as Restaurant["status"]
-                        )
-                      }
-                      className={`rounded-md px-3 py-1.5 text-xs font-medium border
-                ${
-                  item.status === "Đã chuẩn bị"
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                }
-              `}
-                    >
-                      <option value="Chưa chuẩn bị">Chưa chuẩn bị</option>
-                      <option value="Đã chuẩn bị">Đã chuẩn bị</option>
-                    </select>
-                  </td>
-
+                  {/* ACTION */}
                   <td className="px-6 py-4 text-center">
-                    <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-md text-xs">
+                    <button
+                      onClick={() => handleBlockRestaurant(item.id)}
+                      disabled={item.restaurantStatus === "LOCKED"}
+                      className={`
+                        px-4 py-1.5 rounded-md text-xs text-white
+                        ${
+                          item.restaurantStatus === "LOCKED"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-600 hover:bg-red-700"
+                        }
+                      `}>
                       Khóa
                     </button>
                   </td>
                 </tr>
               ))}
+
+              {restaurants.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={5} className="text-center py-6 text-gray-500">
+                    Không có nhà hàng nào
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Overlays */}
       <CreateUserOverlay
         open={openCreate}
         mode="restaurant"
         onClose={() => setOpenCreate(false)}
       />
-      <RestaurantDetailOverlay
-        open={openDetail}
-        restaurantName={selectedRestaurant}
-        onClose={() => setOpenDetail(false)}
-      />
+
+      {selectedRestaurant && (
+        <RestaurantDetailOverlay
+          open={openDetail}
+          restaurantName={selectedRestaurant.name}
+          onClose={() => setOpenDetail(false)}
+        />
+      )}
     </div>
   );
 };

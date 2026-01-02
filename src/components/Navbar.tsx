@@ -4,18 +4,25 @@ import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
 import Button from "./ui/Button";
 import { useNavigate } from "react-router-dom";
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 interface NavbarProps {
-  username: string;
   title: string;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ username, title }) => {
+const Navbar: React.FC<NavbarProps> = ({ title }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
 
-  const toggleMenu = () => {
-    setOpen((prev) => !prev);
-  };
+  // 🔥 LẤY USER TỪ LOCAL STORAGE
+  const user: User | null = JSON.parse(localStorage.getItem("user") || "null");
+
+  const username = user?.name || "Guest";
 
   return (
     <div className="flex justify-between m-6 relative">
@@ -24,8 +31,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, title }) => {
       <div className="relative">
         <div
           className="flex items-center gap-2 text-3xl cursor-pointer select-none"
-          onClick={toggleMenu}
-        >
+          onClick={() => setOpen((prev) => !prev)}>
           <FontAwesomeIcon icon={faUserCircle} />
           <span>{username}</span>
         </div>

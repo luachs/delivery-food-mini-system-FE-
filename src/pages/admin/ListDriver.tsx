@@ -1,166 +1,166 @@
+import React, { useEffect, useState } from "react";
 import CreateUserOverlay from "@/components/CreateUserOverlay";
 import DriverDetailOverlay from "@/components/DriverDetailOverlay";
-
-import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { useDriverStore } from "@/store/driverStore";
 
-type DriverStatus = "available" | "busy" | "offline";
+/* =======================
+   TYPES
+======================= */
+
+type DriverStatus = "BUSY" | "OFFLINE" | "AVAILABLE" | "LOCKED";
 
 type Driver = {
-  id: string;
-  orderId: string;
+  id: number;
+  email: string;
+  phone: string;
   status: DriverStatus;
 };
 
+/* =======================
+   STATUS MAPPER
+======================= */
+
+const DRIVER_STATUS_LABEL: Record<DriverStatus, string> = {
+  AVAILABLE: "Sẵn sàng",
+  BUSY: "Đang giao",
+  OFFLINE: "Ngoại tuyến",
+  LOCKED: "Bị khóa",
+};
+
+const DRIVER_STATUS_STYLE: Record<DriverStatus, string> = {
+  AVAILABLE: "bg-green-100 text-green-700",
+  BUSY: "bg-orange-100 text-orange-700",
+  OFFLINE: "bg-gray-100 text-gray-600",
+  LOCKED: "bg-red-100 text-red-700",
+};
+
 const ListDriver = () => {
-  const [drivers, setDrivers] = useState<Driver[]>([
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-    { id: "A", orderId: "#238283", status: "available" },
-    { id: "B", orderId: "#893483", status: "available" },
-    { id: "C", orderId: "#434573", status: "busy" },
-    { id: "D", orderId: "#676745", status: "offline" },
-  ]);
+  const drivers = useDriverStore((state) => state.drivers);
+  const blockDriver = useDriverStore((state) => state.blockDriver);
+  const fetchDrivers = useDriverStore((state) => state.fetchDrivers);
+  const loading = useDriverStore((state) => state.loading);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
-  const handleStatusChange = (index: number, newStatus: DriverStatus) => {
-    setDrivers((prev) =>
-      prev.map((driver, i) =>
-        i === index ? { ...driver, status: newStatus } : driver
-      )
-    );
+  useEffect(() => {
+    fetchDrivers();
+  }, [fetchDrivers]);
+
+  const handleBlocked = async (driverId: number) => {
+    try {
+      await blockDriver(driverId);
+    } catch (err) {
+      console.error("Lỗi khoá tài khoản Driver: ", err);
+    }
   };
-
   return (
     <div className="container mx-auto mt-10">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="text-xl font-semibold">
           Tổng số lượng tài xế:{" "}
-          <span className="font-semibold">{drivers.length}</span>
+          <span className="font-bold">{drivers.length}</span>
         </div>
 
         <button
           onClick={() => setOpenCreate(true)}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
-        >
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
           Thêm tài xế
         </button>
       </div>
 
+      {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <div className="max-h-[530px] overflow-y-auto">
+        <div className="max-h-[450px] overflow-y-auto">
           <table className="min-w-full text-sm text-left">
-            <thead className="sticky top-0 z-10 border-b bg-gray-50 font-medium">
+            <thead className="sticky top-0 bg-gray-50 border-b z-10">
               <tr>
-                <th className="px-6 py-3">ID tài xế</th>
-                <th className="px-6 py-3">Đơn hàng</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-center">Action</th>
+                <th className="px-6 py-3">ID</th>
+                <th className="px-6 py-3">Email</th>
+                <th className="px-6 py-3">SĐT</th>
+                <th className="px-6 py-3">Trạng thái</th>
+                <th className="px-6 py-3 text-center">Hành động</th>
               </tr>
             </thead>
 
             <tbody>
-              {drivers.map((driver, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
+              {drivers.map((driver) => (
+                <tr
+                  key={driver.id}
+                  className="border-b last:border-b-0 hover:bg-gray-50">
+                  {/* ID + View */}
                   <td className="px-6 py-4 font-medium">
-                    {driver.id}{" "}
-                    <span className="text-sm cursor-pointer hover:text-primary transition duration-300">
-                      <FontAwesomeIcon
-                        icon={faEye}
-                        onClick={() => {
-                          setSelectedDriver(driver);
-                          setOpenDetail(true);
-                        }}
-                        className="ml-1 cursor-pointer hover:text-blue-600 transition"
-                      />
+                    {driver.id}
+                    <FontAwesomeIcon
+                      icon={faEye}
+                      className="ml-2 cursor-pointer text-blue-600 hover:text-blue-800"
+                      onClick={() => {
+                        setSelectedDriverId(driver.id);
+                        setOpenDetail(true);
+                      }}
+                    />
+                  </td>
+
+                  <td className="px-6 py-4">{driver.email}</td>
+                  <td className="px-6 py-4">{driver.phone}</td>
+
+                  {/* STATUS */}
+                  <td className="px-6 py-4">
+                    <span
+                      className={`
+                        px-2 py-1 rounded text-xs font-semibold
+                        ${DRIVER_STATUS_STYLE[driver.status]}
+                      `}>
+                      {DRIVER_STATUS_LABEL[driver.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{driver.orderId}</td>
 
-                  <td className="px-6 py-4">
-                    <select
-                      value={driver.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          index,
-                          e.target.value as DriverStatus
-                        )
-                      }
-                      className={`rounded-md px-3 py-1.5 text-xs font-medium border
-                        ${
-                          driver.status === "available"
-                            ? "bg-green-50 text-green-700 border-green-200"
-                            : driver.status === "busy"
-                            ? "bg-orange-50 text-orange-700 border-orange-200"
-                            : "bg-gray-100 text-gray-600 border-gray-300"
-                        }
-                      `}
-                    >
-                      <option value="available">available</option>
-                      <option value="busy">busy</option>
-                      <option value="offline">offline</option>
-                    </select>
-                  </td>
-
-                  <td className="px-6 py-4 text-center space-x-2">
+                  {/* ACTION */}
+                  <td className="px-6 py-4 text-center">
                     <button
-                      disabled={driver.status !== "busy"}
-                      onClick={() => handleStatusChange(index, "available")}
+                      onClick={() => handleBlocked(driver.id)}
+                      disabled={driver.status === "LOCKED"}
                       className={`
-                        px-3 py-1.5 rounded-md text-xs text-white
+                        px-3 py-1 text-xs rounded text-white
                         ${
-                          driver.status === "busy"
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-gray-300 cursor-not-allowed"
+                          driver.status === "LOCKED"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-600 hover:bg-red-700"
                         }
-                      `}
-                    >
-                      Hoàn thành
-                    </button>
-
-                    <button className="px-3 py-1.5 rounded-md text-xs bg-red-600 hover:bg-red-700 text-white">
+                      `}>
                       Khóa
                     </button>
                   </td>
                 </tr>
               ))}
+
+              {drivers.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={5} className="text-center py-6 text-gray-500">
+                    Không có tài xế nào
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
+      {/* Overlays */}
       <CreateUserOverlay
         open={openCreate}
         mode="driver"
         onClose={() => setOpenCreate(false)}
       />
-      {selectedDriver && (
+
+      {selectedDriverId && (
         <DriverDetailOverlay
           open={openDetail}
-          driverId={selectedDriver.id}
-          status={selectedDriver.status}
+          driverId={selectedDriverId}
           onClose={() => setOpenDetail(false)}
         />
       )}

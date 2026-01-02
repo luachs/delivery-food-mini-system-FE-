@@ -2,31 +2,32 @@
 import React, { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AuthApi from "@/api/AuthApi";
 
 type Errors = {
-  username?: string;
   email?: string;
   password?: string;
 };
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
-    username: "",
     email: "",
     password: "",
   });
 
   const [errors, setErrors] = useState<Errors>({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: Errors = {};
 
-    if (!form.username) newErrors.username = "Username không được để trống";
     if (!form.email) newErrors.email = "Email không được để trống";
     if (!form.password) newErrors.password = "Password không được để trống";
 
@@ -35,8 +36,31 @@ const Login = () => {
       return;
     }
 
-    console.log("LOGIN:", form);
-    // TODO: call API login
+    try {
+      setLoading(true);
+
+      const user = await AuthApi.login({
+        email: form.email,
+        password: form.password,
+      });
+
+      // 🚫 CHỈ CHO ADMIN
+      if (user.role !== "ADMIN") {
+        alert("Chỉ ADMIN mới được phép đăng nhập");
+        return;
+      }
+
+      // ✅ Lưu user
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("Đăng nhập ADMIN thành công 🎉");
+
+      navigate("/listOrder");
+    } catch (err: any) {
+      alert(err?.data?.message || "Đăng nhập thất bại");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,21 +72,13 @@ const Login = () => {
 
         <div className="space-y-4">
           <Input
-            label="Username"
-            placeholder="Nhập username"
-            value={form.username}
-            onChange={(e) => handleChange("username", e.target.value)}
-            error={errors.username}
-          />
-
-          {/* <Input
             label="Email"
             type="email"
             placeholder="Nhập email"
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
             error={errors.email}
-          /> */}
+          />
 
           <Input
             label="Password"
@@ -73,8 +89,8 @@ const Login = () => {
             error={errors.password}
           />
 
-          <Button className="w-full" onClick={handleSubmit}>
-            Đăng nhập
+          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </Button>
         </div>
 
