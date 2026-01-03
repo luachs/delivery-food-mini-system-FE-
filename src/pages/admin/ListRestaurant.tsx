@@ -1,9 +1,10 @@
 import CreateUserOverlay from "@/components/CreateUserOverlay";
 import RestaurantDetailOverlay from "@/components/RestaurantDetailOverlay";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useRestaurantStore } from "@/store/restaurantStore";
+import EditUserOverlay from "@/components/EditUserOverlay";
 
 /* =======================
    TYPES
@@ -12,7 +13,7 @@ import { useRestaurantStore } from "@/store/restaurantStore";
 type RestaurantStatus = "AVAILABLE" | "LOCKED";
 
 type Restaurant = {
-  id: number;
+  ID: number;
   name: string;
   address: string;
   phone: string;
@@ -39,6 +40,8 @@ const RESTAURANT_STATUS_STYLE: Record<RestaurantStatus, string> = {
 
 const ListRestaurant = () => {
   const restaurants = useRestaurantStore((state) => state.restaurants);
+  const [editId, setEditId] = useState<number | null>(null);
+
   const blockRestaurant = useRestaurantStore((state) => state.blockRestaurant);
   const fetchRestaurants = useRestaurantStore(
     (state) => state.fetchRestaurants
@@ -95,11 +98,11 @@ const ListRestaurant = () => {
             <tbody>
               {restaurants.map((item) => (
                 <tr
-                  key={item.id}
+                  key={item.ID}
                   className="border-b last:border-b-0 hover:bg-gray-50">
                   {/* ID + view */}
                   <td className="px-6 py-4 font-medium">
-                    {item.id}
+                    {item.ID}
                     <FontAwesomeIcon
                       icon={faEye}
                       className="ml-2 cursor-pointer text-blue-600 hover:text-blue-800"
@@ -126,10 +129,11 @@ const ListRestaurant = () => {
 
                   {/* ACTION */}
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleBlockRestaurant(item.id)}
-                      disabled={item.restaurantStatus === "LOCKED"}
-                      className={`
+                    <div className="flex gap-4 items-center">
+                      <button
+                        onClick={() => handleBlockRestaurant(item.ID)}
+                        disabled={item.restaurantStatus === "LOCKED"}
+                        className={`
                         px-4 py-1.5 rounded-md text-xs text-white
                         ${
                           item.restaurantStatus === "LOCKED"
@@ -137,8 +141,14 @@ const ListRestaurant = () => {
                             : "bg-red-600 hover:bg-red-700"
                         }
                       `}>
-                      Khóa
-                    </button>
+                        Khóa
+                      </button>
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        onClick={() => setEditId(item.ID)}
+                        className="text-xl hover:text-primary transition duration-300 cursor-pointer"
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -161,7 +171,14 @@ const ListRestaurant = () => {
         mode="restaurant"
         onClose={() => setOpenCreate(false)}
       />
-
+      {editId && (
+        <EditUserOverlay
+          open={true}
+          mode="restaurant"
+          userId={editId}
+          onClose={() => setEditId(null)}
+        />
+      )}
       {selectedRestaurant && (
         <RestaurantDetailOverlay
           open={openDetail}

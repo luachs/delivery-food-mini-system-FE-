@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import CreateUserOverlay from "@/components/CreateUserOverlay";
 import DriverDetailOverlay from "@/components/DriverDetailOverlay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useDriverStore } from "@/store/driverStore";
+import EditUserOverlay from "@/components/EditUserOverlay";
 
 /* =======================
    TYPES
@@ -41,6 +42,7 @@ const ListDriver = () => {
   const blockDriver = useDriverStore((state) => state.blockDriver);
   const fetchDrivers = useDriverStore((state) => state.fetchDrivers);
   const loading = useDriverStore((state) => state.loading);
+  const [editId, setEditId] = useState<number | null>(null);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
@@ -121,10 +123,11 @@ const ListDriver = () => {
 
                   {/* ACTION */}
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleBlocked(driver.id)}
-                      disabled={driver.status === "LOCKED"}
-                      className={`
+                    <div className="flex gap-3 items-center justify-center">
+                      <button
+                        onClick={() => handleBlocked(driver.id)}
+                        disabled={driver.status === "LOCKED"}
+                        className={`
                         px-3 py-1 text-xs rounded text-white
                         ${
                           driver.status === "LOCKED"
@@ -132,8 +135,14 @@ const ListDriver = () => {
                             : "bg-red-600 hover:bg-red-700"
                         }
                       `}>
-                      Khóa
-                    </button>
+                        Khóa
+                      </button>
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        onClick={() => setEditId(driver.id)}
+                        className="text-xl hover:text-primary transition duration-300 cursor-pointer"
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -156,7 +165,14 @@ const ListDriver = () => {
         mode="driver"
         onClose={() => setOpenCreate(false)}
       />
-
+      {editId && (
+        <EditUserOverlay
+          open={true}
+          mode="driver"
+          userId={editId}
+          onClose={() => setEditId(null)}
+        />
+      )}
       {selectedDriverId && (
         <DriverDetailOverlay
           open={openDetail}

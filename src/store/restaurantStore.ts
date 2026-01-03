@@ -5,7 +5,7 @@ import RestaurantApi from "@/api/RestaurantApi";
 export type RestaurantStatus = "AVAILABLE" | "LOCKED";
 
 export type Restaurant = {
-  id: number;
+  ID: number;
   name: string;
   phone: string;
   address: string;
@@ -29,6 +29,7 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
     try {
       const data = await UserApi.getByRole("RESTAURANT");
       set({ restaurants: data, loading: false });
+      console.log(data);
     } catch (error) {
       console.error("Lỗi khi lấy nhà hàng:", error);
       set({ loading: false });
@@ -45,7 +46,7 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
 
     set((state) => ({
       restaurants: state.restaurants.map((r) =>
-        r.id === id ? { ...r, restaurantStatus: "LOCKED" } : r
+        r.ID === id ? { ...r, restaurantStatus: "LOCKED" } : r
       ),
     }));
   },

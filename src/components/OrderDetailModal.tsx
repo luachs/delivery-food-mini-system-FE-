@@ -39,6 +39,7 @@ type OrderDetail = {
 const OrderDetailModal: React.FC<Props> = ({ open, onClose, orderId }) => {
   const [order, setOrder] = useState<any>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [drivers, setDrivers] = useState<any[]>([]);
 
   const revealClass = `
     transition-all duration-300 ease-out
@@ -64,10 +65,12 @@ const OrderDetailModal: React.FC<Props> = ({ open, onClose, orderId }) => {
     fetchOrderDetail();
   }, [open, orderId]);
 
-  const handleFindDriver = () => {
+  const handleFindDriver = async () => {
     try {
-      const res = OrderApi.suggestDrivers(orderId);
+      const res = await OrderApi.suggestDrivers(orderId);
       console.log(res);
+      setDrivers(res.slice(0, 5));
+      setIsOpen(true);
     } catch (err) {
       console.error("Lỗi tìm tài xế: ", err);
     }
@@ -149,7 +152,6 @@ const OrderDetailModal: React.FC<Props> = ({ open, onClose, orderId }) => {
               <button
                 className="bg-primary hover:bg-red-600 px-4 py-2 rounded"
                 onClick={() => {
-                  setIsOpen(true);
                   handleFindDriver();
                 }}>
                 Tìm
@@ -159,7 +161,8 @@ const OrderDetailModal: React.FC<Props> = ({ open, onClose, orderId }) => {
             {/* Reveal content */}
             <div className={`mt-4 ${revealClass}`}>
               <p>
-                Đề xuất: <b>Driver 1</b> là lựa chọn hợp lý nhất
+                Đề xuất: <b>{drivers[0]?.name ?? "Chưa có đề xuất"}</b> là lựa
+                chọn hợp lí nhất
               </p>
 
               <button className="mt-4 bg-primary hover:bg-red-700 px-4 py-2 rounded">
@@ -187,17 +190,22 @@ const OrderDetailModal: React.FC<Props> = ({ open, onClose, orderId }) => {
                 </li>
               )}
             </ul>
+            <p className="mt-5 font-semibold">
+              <FontAwesomeIcon icon={faCar} className="text-primary" /> 5 tài xế
+              gần nhất:
+            </p>
 
             <select
               className={`
-                mt-6 w-full rounded-md bg-[#0f0e17]
+                mt-1 w-full rounded-md bg-[#0f0e17]
                 border border-white/10 px-3 py-2
                 ${revealClass}
               `}>
-              <option>Driver 1 - 1km</option>
-              <option>Driver 2 - 2km</option>
-              <option>Driver 3 - 5km</option>
-              <option>Driver 4 - 7km</option>
+              {drivers.map((driver, index) => (
+                <option key={driver.id}>
+                  {driver.name} - {driver.distanceKm}km
+                </option>
+              ))}
             </select>
           </div>
         </div>
