@@ -41,6 +41,8 @@ const DRIVER_STATUS_STYLE: Record<DriverStatus, string> = {
 const ListDriver = () => {
   const drivers = useDriverStore((state) => state.drivers);
   const blockDriver = useDriverStore((state) => state.blockDriver);
+  const unlockDriver = useDriverStore((state) => state.unlockDriver);
+
   const fetchDrivers = useDriverStore((state) => state.fetchDrivers);
   const loading = useDriverStore((state) => state.loading);
   const [editId, setEditId] = useState<number | null>(null);
@@ -60,6 +62,15 @@ const ListDriver = () => {
       console.error("Lỗi khoá tài khoản Driver: ", err);
     }
   };
+
+  const handleUnlock = async (id: number) => {
+    try {
+      await unlockDriver(id);
+    } catch (err) {
+      console.error("Lỗi mở khóa driver:", err);
+    }
+  };
+
   return (
     <div className="container mx-auto mt-10">
       {/* Header */}
@@ -126,19 +137,22 @@ const ListDriver = () => {
                   {/* ACTION */}
                   <td className="px-6 py-4 text-center">
                     <div className="flex gap-3 items-center justify-center">
-                      <button
-                        onClick={() => handleBlocked(driver.id)}
-                        disabled={driver.status === "LOCKED"}
-                        className={`
-                        px-3 py-1 text-xs rounded text-white
-                        ${
-                          driver.status === "LOCKED"
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-red-600 hover:bg-red-700"
-                        }
-                      `}>
-                        Khóa
-                      </button>
+                      {/* CHỈ 1 NÚT */}
+                      {driver.status === "LOCKED" ? (
+                        <button
+                          onClick={() => handleUnlock(driver.id)}
+                          className="w-[90px] px-3 py-1 text-xs rounded text-white bg-primary hover:bg-green-600">
+                          Mở khóa
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBlocked(driver.id)}
+                          className="w-[90px] px-3 py-1 text-xs rounded text-white bg-primary hover:bg-red-600">
+                          Khóa
+                        </button>
+                      )}
+
+                      {/* EDIT */}
                       <FontAwesomeIcon
                         icon={faPenToSquare}
                         onClick={() => setEditId(driver.id)}

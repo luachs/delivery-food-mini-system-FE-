@@ -17,6 +17,9 @@ const DriverApi = {
   block(id) {
     return axiosClient.delete(`/drivers/${id}`);
   },
+  unlock(id) {
+    return axiosClient.put(`/drivers/${id}/unlock`);
+  },
 };
 
 export default DriverApi;

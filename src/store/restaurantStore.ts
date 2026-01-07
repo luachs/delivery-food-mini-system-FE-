@@ -18,9 +18,10 @@ type RestaurantStore = {
   fetchRestaurants: () => Promise<void>;
   addRestaurant: (restaurant: Restaurant) => void;
   blockRestaurant: (id: number) => Promise<void>;
+  unlockRestaurant: (id: number) => Promise<void>; // ✅ THÊM
 };
 
-export const useRestaurantStore = create<RestaurantStore>((set) => ({
+export const useRestaurantStore = create<RestaurantStore>((set, get) => ({
   restaurants: [],
   loading: false,
 
@@ -29,7 +30,6 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
     try {
       const data = await UserApi.getByRole("RESTAURANT");
       set({ restaurants: data, loading: false });
-      console.log(data);
     } catch (error) {
       console.error("Lỗi khi lấy nhà hàng:", error);
       set({ loading: false });
@@ -41,12 +41,22 @@ export const useRestaurantStore = create<RestaurantStore>((set) => ({
       restaurants: [restaurant, ...state.restaurants],
     })),
 
-  blockRestaurant: async (id) => {
+  blockRestaurant: async (id: number) => {
     await RestaurantApi.block(id);
 
     set((state) => ({
       restaurants: state.restaurants.map((r) =>
         r.ID === id ? { ...r, restaurantStatus: "LOCKED" } : r
+      ),
+    }));
+  },
+
+  unlockRestaurant: async (id: number) => {
+    await RestaurantApi.unlock(id);
+
+    set((state) => ({
+      restaurants: state.restaurants.map((r) =>
+        r.ID === id ? { ...r, restaurantStatus: "AVAILABLE" } : r
       ),
     }));
   },

@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import driverApi from "@/api/driverApi";
+import DriverApi from "@/api/DriverApi";
 
-type DriverStatus = "BUSY" | "OFFLINE" | "AVAILABLE" | "LOCKED";
+export type DriverStatus = "BUSY" | "OFFLINE" | "AVAILABLE" | "LOCKED";
 
-type Driver = {
+export type Driver = {
   id: number;
   email: string;
   phone: string;
@@ -14,9 +14,8 @@ type DriverStore = {
   drivers: Driver[];
   loading: boolean;
   fetchDrivers: () => Promise<void>;
-  addDriver: (driver: Driver) => void;
-
   blockDriver: (id: number) => Promise<void>;
+  unlockDriver: (id: number) => Promise<void>;
 };
 
 export const useDriverStore = create<DriverStore>((set) => ({
@@ -25,20 +24,31 @@ export const useDriverStore = create<DriverStore>((set) => ({
 
   fetchDrivers: async () => {
     set({ loading: true });
-    const res = await driverApi.getAll();
-    set({ drivers: res, loading: false });
+    try {
+      const data = await DriverApi.getAll();
+      set({ drivers: data, loading: false });
+    } catch (err) {
+      console.error("Lỗi lấy driver:", err);
+      set({ loading: false });
+    }
   },
 
-  addDriver: (driver) =>
-    set((state) => ({
-      drivers: [driver, ...state.drivers],
-    })),
-  blockDriver: async (id) => {
-    await driverApi.block(id); // gọi API backend
+  blockDriver: async (id: number) => {
+    await DriverApi.block(id);
 
     set((state) => ({
       drivers: state.drivers.map((d) =>
         d.id === id ? { ...d, status: "LOCKED" } : d
+      ),
+    }));
+  },
+
+  unlockDriver: async (id: number) => {
+    await DriverApi.unlock(id);
+
+    set((state) => ({
+      drivers: state.drivers.map((d) =>
+        d.id === id ? { ...d, status: "AVAILABLE" } : d
       ),
     }));
   },

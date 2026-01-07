@@ -9,6 +9,9 @@ const RestaurantApi = {
   block(id) {
     return axiosClient.delete(`/restaurants/${id}`);
   },
+  unlock(id) {
+    return axiosClient.put(`/restaurants/${id}/unlock`);
+  },
 };
 
 export default RestaurantApi;

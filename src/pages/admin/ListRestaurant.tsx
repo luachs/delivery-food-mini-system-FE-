@@ -44,6 +44,10 @@ const ListRestaurant = () => {
   const [editId, setEditId] = useState<number | null>(null);
 
   const blockRestaurant = useRestaurantStore((state) => state.blockRestaurant);
+  const unlockRestaurant = useRestaurantStore(
+    (state) => state.unlockRestaurant
+  );
+
   const fetchRestaurants = useRestaurantStore(
     (state) => state.fetchRestaurants
   );
@@ -63,6 +67,14 @@ const ListRestaurant = () => {
       await blockRestaurant(id);
     } catch (err) {
       console.error("Lỗi khóa nhà hàng:", err);
+    }
+  };
+
+  const handleUnlockRestaurant = async (id: number) => {
+    try {
+      await unlockRestaurant(id);
+    } catch (err) {
+      console.error("Lỗi mở khóa nhà hàng:", err);
     }
   };
 
@@ -92,7 +104,7 @@ const ListRestaurant = () => {
                 <th className="px-6 py-3">ID</th>
                 <th className="px-6 py-3">Địa chỉ</th>
                 <th className="px-6 py-3">SĐT</th>
-                <th className="px-6 py-3">Trạng thái</th>
+                <th className=" px-6 py-3 w-[200px]">Trạng thái</th>
                 <th className="px-6 py-3 text-center">Hành động</th>
               </tr>
             </thead>
@@ -115,14 +127,14 @@ const ListRestaurant = () => {
                     />
                   </td>
 
-                  <td className="px-6 py-4">{item.address}</td>
+                  <td className="px-5 py-4">{item.address}</td>
                   <td className="px-6 py-4">{item.phone}</td>
 
                   {/* STATUS */}
                   <td className="px-6 py-4">
                     <span
                       className={`
-                        px-3 py-1.5 rounded-md text-xs font-semibold border
+                        px-2 py-1.5 rounded-md text-xs font-semibold border
                         ${RESTAURANT_STATUS_STYLE[item.restaurantStatus]}
                       `}>
                       {RESTAURANT_STATUS_LABEL[item.restaurantStatus]}
@@ -131,20 +143,23 @@ const ListRestaurant = () => {
 
                   {/* ACTION */}
                   <td className="px-6 py-4 text-center">
-                    <div className="flex gap-4 items-center">
-                      <button
-                        onClick={() => handleBlockRestaurant(item.ID)}
-                        disabled={item.restaurantStatus === "LOCKED"}
-                        className={`
-                        px-4 py-1.5 rounded-md text-xs text-white
-                        ${
-                          item.restaurantStatus === "LOCKED"
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-red-600 hover:bg-red-700"
-                        }
-                      `}>
-                        Khóa
-                      </button>
+                    <div className="flex gap-4 items-center justify-center">
+                      {/* CHỈ 1 NÚT DUY NHẤT */}
+                      {item.restaurantStatus === "AVAILABLE" ? (
+                        <button
+                          onClick={() => handleBlockRestaurant(item.ID)}
+                          className="w-[90px] px-4 py-1.5 rounded-md text-xs text-white bg-primary hover:bg-red-600">
+                          Khóa
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleUnlockRestaurant(item.ID)}
+                          className="w-[90px] px-4 py-1.5 rounded-md text-xs text-white bg-primary hover:bg-green-600">
+                          Mở khóa
+                        </button>
+                      )}
+
+                      {/* EDIT */}
                       <FontAwesomeIcon
                         icon={faPenToSquare}
                         onClick={() => setEditId(item.ID)}
