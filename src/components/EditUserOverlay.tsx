@@ -29,6 +29,7 @@ const EditUserOverlay: React.FC<Props> = ({
     email: "",
     phone: "",
     address: "",
+    currentLocation: "",
     lat: 0,
     lng: 0,
   });
@@ -53,11 +54,13 @@ const EditUserOverlay: React.FC<Props> = ({
         ? await DriverApi.getById(userId)
         : await RestaurantApi.getById(userId);
 
+      console.log(res);
       setForm({
         name: res.name,
         email: res.email,
         phone: res.phone,
-        address: res.address,
+        address: isDriver ? "" : res.address,
+        currentLocation: isDriver ? res.currentLocation : "",
         lat: res.currentLat || res.lat || 0,
         lng: res.currentLng || res.lng || 0,
       });
@@ -74,7 +77,7 @@ const EditUserOverlay: React.FC<Props> = ({
       ? {
           name: form.name,
           phone: form.phone,
-          address: form.address,
+          currentLocation: form.currentLocation,
           currentLat: Number(form.lat),
           currentLng: Number(form.lng),
         }
@@ -128,9 +131,14 @@ const EditUserOverlay: React.FC<Props> = ({
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
           <Input
-            label="Địa chỉ"
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            label={isDriver ? "Vị trí hiện tại" : "Địa chỉ"}
+            value={isDriver ? form.currentLocation : form.address}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                [isDriver ? "currentLocation" : "address"]: e.target.value,
+              })
+            }
           />
 
           <div className="flex gap-4">

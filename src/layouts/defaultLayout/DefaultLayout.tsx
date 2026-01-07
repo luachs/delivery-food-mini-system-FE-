@@ -1,7 +1,6 @@
 import Sidebar from "../components/sidebar/Sidebar";
 import Header from "../components/header/Header";
 import React from "react";
-import Navbar from "@/components/Navbar";
 
 type Props = React.PropsWithChildren;
 
@@ -19,10 +18,7 @@ const DefaultLayout = ({ children }: Props) => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-4 bg-gray-100">
-          <Navbar title="Danh sách đơn hàng" username="Quản trị Viên" />
-          {children}
-        </main>
+        <main className="flex-1 p-4 bg-gray-100">{children}</main>
       </div>
     </div>
   );

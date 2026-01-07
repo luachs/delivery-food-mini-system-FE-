@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useRestaurantStore } from "@/store/restaurantStore";
 import EditUserOverlay from "@/components/EditUserOverlay";
+import Navbar from "@/components/Navbar";
 
 /* =======================
    TYPES
@@ -68,6 +69,7 @@ const ListRestaurant = () => {
   return (
     <div className="container mx-auto mt-[50px]">
       {/* Header */}
+      <Navbar title="Danh sách Nhà hàng" />
       <div className="flex items-center justify-between mb-8">
         <div className="text-xl font-semibold text-gray-700">
           Tổng số lượng nhà hàng:{" "}
@@ -182,7 +184,7 @@ const ListRestaurant = () => {
       {selectedRestaurant && (
         <RestaurantDetailOverlay
           open={openDetail}
-          restaurantName={selectedRestaurant.name}
+          restaurantId={selectedRestaurant.ID}
           onClose={() => setOpenDetail(false)}
         />
       )}

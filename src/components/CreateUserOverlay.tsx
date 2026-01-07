@@ -21,6 +21,7 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
     email: "",
     phone: "",
     address: "",
+    currentLocation: "",
     lat: 0,
     lng: 0,
     status: "available" as Status,
@@ -72,17 +73,24 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
     if (isDriver) {
       if (!form.phone.trim())
         newErrors.push("Số điện thoại không được để trống");
-      if (!form.address.trim()) newErrors.push("Địa chỉ không được để trống");
+
+      if (!form.currentLocation.trim())
+        newErrors.push("Vị trí hiện tại không được để trống");
+
       if (!form.lat || isNaN(Number(form.lat)))
         newErrors.push("Latitude không hợp lệ");
+
       if (!form.lng || isNaN(Number(form.lng)))
         newErrors.push("Longitude không hợp lệ");
     } else {
       if (!form.phone.trim())
         newErrors.push("Số điện thoại không được để trống");
+
       if (!form.address.trim()) newErrors.push("Địa chỉ không được để trống");
+
       if (!form.lat || isNaN(Number(form.lat)))
         newErrors.push("Latitude không hợp lệ");
+
       if (!form.lng || isNaN(Number(form.lng)))
         newErrors.push("Longitude không hợp lệ");
     }
@@ -115,7 +123,7 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
           name: form.name,
           email: form.email,
           phone: form.phone,
-          address: form.address,
+          currentLocation: form.currentLocation, // ✅ ĐÚNG
           currentLat: Number(form.lat),
           currentLng: Number(form.lng),
           role: "DRIVER",
@@ -133,6 +141,7 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
         email: "",
         phone: "",
         address: "",
+        currentLocation: "",
         lat: 0,
         lng: 0,
         status: "available",
@@ -201,10 +210,15 @@ const CreateUserOverlay: React.FC<Props> = ({ open, mode, onClose }) => {
           />
 
           <Input
-            label="Địa chỉ"
-            placeholder="Nhập địa chỉ"
-            value={form.address}
-            onChange={(e) => handleChange("address", e.target.value)}
+            label={isDriver ? "Vị trí hiện tại" : "Địa chỉ"}
+            placeholder={isDriver ? "Nhập vị trí hiện tại" : "Nhập địa chỉ"}
+            value={isDriver ? form.currentLocation : form.address}
+            onChange={(e) =>
+              handleChange(
+                isDriver ? "currentLocation" : "address",
+                e.target.value
+              )
+            }
           />
 
           <div className="flex gap-7">

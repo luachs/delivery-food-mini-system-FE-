@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useDriverStore } from "@/store/driverStore";
 import EditUserOverlay from "@/components/EditUserOverlay";
+import Navbar from "@/components/Navbar";
 
 /* =======================
    TYPES
@@ -62,6 +63,7 @@ const ListDriver = () => {
   return (
     <div className="container mx-auto mt-10">
       {/* Header */}
+      <Navbar title="Danh sách Tài xế" />
       <div className="flex items-center justify-between mb-6">
         <div className="text-xl font-semibold">
           Tổng số lượng tài xế:{" "}

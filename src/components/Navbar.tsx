@@ -25,7 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ title }) => {
   const username = user?.name || "Guest";
 
   return (
-    <div className="flex justify-between m-6 relative">
+    <div className="flex justify-between my-6 relative">
       <h1 className="text-3xl font-bold">{title}</h1>
 
       <div className="relative">

@@ -3,7 +3,6 @@ const RestaurantApi = {
   getById(id) {
     return axiosClient.get(`/restaurants/${id}`);
   },
-
   update(id, data) {
     return axiosClient.put(`/restaurants/${id}`, data);
   },
